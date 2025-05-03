@@ -2,9 +2,14 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useCart } from '@/app/contexts/CartContexts';
+import { useRouter } from 'next/navigation';
 
 export default function ProductCard({ product }) {
   const [imageError, setImageError] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const { addItemToCart } = useCart();
+  const router = useRouter();
   
   // Updated function to use the URL directly from the product model
   const getImageSrc = () => {
@@ -63,13 +68,29 @@ export default function ProductCard({ product }) {
             </Link>
             <button
               className="px-3 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors"
-              onClick={(e) => {
+              onClick={async (e) => {
                 e.preventDefault();
-                // We'll implement this in the next class
-                console.log('Add to cart:', product.id);
+                
+                // Check if user is logged in
+                if (!localStorage.getItem('auth_token')) {
+                  router.push('/login');
+                  return;
+                }
+                
+                setIsAdding(true);
+                try {
+                  await addItemToCart(product.id);
+                  // Optionally, show a success message
+                } catch (error) {
+                  console.error('Failed to add to cart:', error);
+                  // Optionally, show an error message
+                } finally {
+                  setIsAdding(false);
+                }
               }}
+              disabled={isAdding}
             >
-              Add to Cart
+              {isAdding ? 'Adding...' : 'Add to Cart'}
             </button>
           </div>
         </div>

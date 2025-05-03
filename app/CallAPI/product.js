@@ -1,7 +1,7 @@
 // lib/api/products.js
 // API functions for product-related endpoints
 
-import { API_BASE_URL, getAuthHeaders, handleResponse } from './config';
+import { API_BASE_URL, DEFAULT_HEADERS, handleResponse } from './config';
 
 /**
  * Get all products with optional filtering
@@ -19,9 +19,10 @@ export const getProducts = async (params = {}) => {
     const queryString = searchParams.toString();
     const url = `${API_BASE_URL}/products/${queryString ? `?${queryString}` : ''}`;
     
+    // Use DEFAULT_HEADERS instead of getAuthHeaders() for public endpoints
     const response = await fetch(url, {
       method: 'GET',
-      headers: getAuthHeaders(),
+      headers: DEFAULT_HEADERS,
     });
     
     return handleResponse(response);
@@ -38,9 +39,10 @@ export const getProducts = async (params = {}) => {
  */
 export const getProductBySlug = async (slug) => {
   try {
+    // Use DEFAULT_HEADERS instead of getAuthHeaders() for public endpoints
     const response = await fetch(`${API_BASE_URL}/products/${slug}/`, {
       method: 'GET',
-      headers: getAuthHeaders(),
+      headers: DEFAULT_HEADERS,
     });
     
     return handleResponse(response);
@@ -56,9 +58,10 @@ export const getProductBySlug = async (slug) => {
  */
 export const getFeaturedProducts = async () => {
   try {
+    // Use DEFAULT_HEADERS instead of getAuthHeaders() for public endpoints
     const response = await fetch(`${API_BASE_URL}/products/featured/`, {
       method: 'GET',
-      headers: getAuthHeaders(),
+      headers: DEFAULT_HEADERS,
     });
     
     return handleResponse(response);

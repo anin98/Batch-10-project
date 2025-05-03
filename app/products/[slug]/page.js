@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getProductBySlug } from '@/app/CallAPI/product';
+import { useCart } from '@/contexts/CartContext';
+import { useRouter } from 'next/navigation';
 
 export default function ProductDetailPage({ params }) {
   const { slug } = params;
@@ -11,6 +13,9 @@ export default function ProductDetailPage({ params }) {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState(null);
+  const [isAdding, setIsAdding] = useState(false);
+  const { addItemToCart } = useCart();
+  const router = useRouter();
   
   useEffect(() => {
     async function fetchProduct() {
@@ -39,9 +44,23 @@ export default function ProductDetailPage({ params }) {
     }
   };
   
-  const handleAddToCart = () => {
-    // We'll implement this in Class 2
-    console.log(`Adding ${quantity} of ${product?.name} to cart`);
+  const handleAddToCart = async () => {
+    // Check if user is logged in
+    if (!localStorage.getItem('auth_token')) {
+      router.push('/login');
+      return;
+    }
+    
+    setIsAdding(true);
+    try {
+      await addItemToCart(product.id, quantity);
+      // Optionally, show a success message
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+      // Optionally, show an error message
+    } finally {
+      setIsAdding(false);
+    }
   };
   
   // Updated function to use the URL directly from the product model
@@ -156,9 +175,9 @@ export default function ProductDetailPage({ params }) {
               type="button"
               onClick={handleAddToCart}
               className="mt-6 w-full bg-indigo-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              disabled={product.stock <= 0}
+              disabled={product.stock <= 0 || isAdding}
             >
-              Add to Cart
+              {isAdding ? 'Adding...' : 'Add to Cart'}
             </button>
           </div>
           

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { getCurrentUser, logout } from '@/app/CallAPI/auth';
+import { useCart } from '@/app/contexts/CartContexts';
 
 
 export default function Navbar() {
@@ -13,6 +14,7 @@ export default function Navbar() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { itemCount, fetchCart } = useCart();
   
   const navLinks = [
     { name: 'Home', href: '/' },
@@ -53,10 +55,11 @@ export default function Navbar() {
     const hasToken = localStorage.getItem('auth_token');
     if (hasToken) {
       checkAuth();
+      fetchCart(); // Fetch cart when authenticated
     } else {
       setLoading(false);
     }
-  }, [pathname]); // Re-check when pathname changes
+  }, [pathname, fetchCart]); // Re-check when pathname changes
   
   const handleLogout = async () => {
     try {
@@ -110,7 +113,7 @@ export default function Navbar() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                 </svg>
                 <span className="absolute -top-2 -right-2 bg-indigo-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                  0
+                  {itemCount}
                 </span>
               </div>
             </Link>
@@ -214,7 +217,7 @@ export default function Navbar() {
               className="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Cart
+              Cart ({itemCount})
             </Link>
             
             {user ? (
